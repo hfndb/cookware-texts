@@ -1,13 +1,17 @@
 # cookware-texts
 
-_cookware-texts_ is a modular toolkit, a next step after [cookware-headless-ice](https://github.com/hfndb/cookware-headless-ice). **Still being developed**.
+`cookware-texts` is a toolkit with plugins, a next step after [cookware-headless-ice](https://github.com/hfndb/cookware-headless-ice).
+
+This program is **still being developed. For now**, you can sneak-preview the parts directory with parts of `cookware-texts` in it:
++ [notes](./parts/notes/): Tiny system to prevent usage of a database server, relational or document oriented
 
 
 ## Prerequisites
 
 Installation of prerequisites:
 ```
-apt-get install git gitk mplayer nodejs nodejs-doc npm whois
+apt-get install git gitk imagemagick mplayer nodejs nodejs-doc npm whois
+npm install -g pnpm
 ```
 
 In case you experience problems while installing global packages, look [here](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally).
@@ -15,10 +19,18 @@ In case you experience problems while installing global packages, look [here](ht
 
 ## Installation
 
+Npm package manager:
 ```
 $ cd /absolute/path/to/cookware-texts
 $ npm install
 $ npm build
+```
+
+Pnpm package manager:
+```
+$ cd /absolute/path/to/cookware-texts
+$ pnpm install
+$ pnpm build
 ```
 
 Add an alias in your ~/.bashrc, for your convenience:

@@ -2,7 +2,7 @@
 
 Back to [main  page](/README.md).
 
-Assuming that you have created the symlink *cookware-texts*, the following commands can be executed:
+Assuming that you have created the symlink `cookware-texts`, the following commands can be executed:
 
 
 ## Playground

@@ -1,0 +1,20 @@
+{
+  "name": "notes",
+  "homepage": "https://github.com/hfndb/tools/tree/master/programs/notes",
+  "version": "1.0.0",
+  "description": "Store notes in a file system",
+  "main": "src/store/notes/index.mjs",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "ssh://github.com/hfndb/tools"
+  },
+  "dependencies": {
+    "colors": "1.4.0",
+    "date-and-time": "^0.14.2",
+    "fdir": "^5.1.0",
+    "shelljs": "^0.8.4"
+  },
+  "author": "Nick",
+  "license": "CC-BY-NC-4.0"
+}
