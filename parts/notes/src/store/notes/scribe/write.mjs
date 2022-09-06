@@ -40,8 +40,7 @@ export class Writer {
 
 	path = ""; // To 'current'
 
-	/**
-	 * Called at the end of append()
+	/** Called from StoreManager and here at the end of append()
 	 *
 	 * @param {string} tpc
 	 * @param {Object} keys
@@ -69,7 +68,8 @@ export class Writer {
 		lck.unlock(); // For other pid's
 	}
 
-	/**
+	/** Called from StoreManager
+	 *
 	 * @param {Topic} tpc
 	 * @param {boolean} force If already written
 	 */
@@ -82,8 +82,7 @@ export class Writer {
 		Notes.addWrite(performance.now() - bgn, JSON.stringify(tpc));
 	}
 
-	/**
-	 * @private
+	/** @private
 	 */
 	async append2file() {
 		try {
@@ -100,24 +99,99 @@ export class Writer {
 		this.size.toWrite = 0;
 	}
 
+	/** @private
+	 * @param {Topic} tpc
+	 * @param {Structure} strctr
+	 * @param {Note[]} changes
+	 */
+	async updateFiles(tpc, strctr, changes) {
+		// Quick check. Any note to update or shred?
+		let changed = toWrite.reduce((acc, item, idx) => {
+			if (item.__status == Note.STATUS_NEW) return acc;
+			acc = true;
+			return acc;
+		}, false);
+		if (!changed) return;
+
+		let idx,
+			sm = await StoreManager.getInstance(),
+			rewrite = false,
+			rt,
+			rdr = new Reader(),
+			tmp;
+
+		// Collect file list to process:
+
+		// Merged in all servers
+		let files = sm.get4reading(tpc, strctr.name, 1);
+
+		// Queue not merged yet in all pid's
+		tmp = sm.get4reading(tpc, strctr.name, 2);
+		files.push(...tmp);
+
+		// Function for Reader.scanFile()
+		let processNote = nt => {
+			idx = changes.findIndex(item => item.key == nt.key);
+			if (idx < 0) return 1; // No change, add to rt
+
+			if (changes[idx].__status == Note.STATUS_SHREDDED) {
+				rewrite = true;
+				return 0; // Ignore
+			}
+
+			if (changes[idx].__status == Note.STATUS_CHANGED) {
+				rewrite = true;
+				return 1; // Add to rt
+			}
+		};
+
+		// Process file list
+		for (let i = 0; !rdr.isStopped && i < files.length; i++) {
+			if (!test("-f", files[i])) continue;
+			rewrite = false;
+			rt = [];
+
+			// Collect all notes to write in rt while filtering out shredded
+			rdr.reset(Reader.SCAN_FILTER, tpc, strctr, processNote, rt);
+			await rdr.scanFile(files[i]);
+			if (!rewrite) continue;
+
+			// Convert Note instances in rt to writeables
+			for (let i = 0; i < rt.length; i++) {
+				idx = changes.findIndex(item => item.key == rt[i].key);
+				if (idx >= 0 && changes[idx].__status == Note.STATUS_CHANGED) {
+					rt[i] = changes[idx]; // Replace note
+				}
+				rt[i] = Note.get2write(tpc, nt);
+			}
+
+			// Overwrite
+			await Queues.get(files[i]); // Just to be sure
+			FileUtils.writeFile("", files[i], rt.join(""), false, true);
+			Queues.done(files[i]);
+		}
+	}
+
 	/**
 	 * Append to current
 	 *
 	 * @param {string} server
 	 * @param {string} pid
 	 * @param {Topic} tpc
-	 * @param {string} strctr
+	 * @param {Structure} strctr
 	 * @param {Note[]} toWrite
 	 * @returns {Promise<boolean>} for success
 	 */
-	async append(server, pid, tpc, strctr, toWrite) {
+	async write(server, pid, tpc, strctr, toWrite) {
+		await this.updateFiles(toWrite); // First update
+
 		let sm = await StoreManager.getInstance();
 		let keys = await Reader.getKeys(tpc.name, true);
 
 		// Needed for append2file()
 		this.batch = ""; // raw data to write
 		this.success = true;
-		this.path = sm.getCurrent4process(tpc, strctr, server, pid);
+		this.path = sm.getCurrent4process(tpc, strctr.name, server, pid);
 
 		await Queues.get(this.path); // Just to be sure
 
@@ -129,10 +203,11 @@ export class Writer {
 		let data, nt;
 		for (let i = 0; this.success && i < toWrite.length; i++) {
 			nt = toWrite[i]; // Note
+			if (nt.__status != Note.STATUS_NEW) continue;
 
 			// Get new key
-			if (!keys[tpc.name][strctr]) keys[tpc.name][strctr] = 0; // In case of very first
-			nt.key = ++keys[tpc.name][strctr];
+			if (!keys[tpc.name][strctr.name]) keys[tpc.name][strctr.name] = 0; // In case of very first
+			nt.key = ++keys[tpc.name][strctr.name];
 			this.newKeys.push(nt.key);
 
 			data = Note.get2write(tpc, nt);
@@ -148,7 +223,10 @@ export class Writer {
 			if (isLast || needsNext) {
 				if (needsNext) {
 					// Move current file to queue file
-					mv(this.path, sm.getQueueFile4process(tpc, strctr, server, pid, true));
+					mv(
+						this.path,
+						sm.getQueueFile4process(tpc, strctr.name, server, pid, true),
+					);
 					touch(this.path); // Force creation of new current file
 					sizes.current = 0;
 					this.size.written = 0;

@@ -1,18 +1,19 @@
 "use strict";
 import { createReadStream, ReadStream } from "node:fs";
 import { join } from "node:path";
+import { isAbsolute, join } from "node:path";
 import { Queues } from "../../../queue.mjs";
 import { Lock } from "../../../file-system/lock.mjs";
 import {
 	test,
 	FileUtils,
+	Inquirer,
 	log,
 	Note,
 	Notes,
 	Structure,
 	Topic,
 } from "../index.mjs";
-import { Inquirer } from "../inquirer.mjs";
 import { StoreManager } from "../manager.mjs";
 
 // For study: https://github.com/baudehlo/node-fs-ext
@@ -26,9 +27,13 @@ import { StoreManager } from "../manager.mjs";
  * @param {Topic} tpc
  */
 export class Reader {
+	static SCAN_INQUIRER = 1;
+	static SCAN_FILTER = 2;
+
 	block = false; // Block reading
 	fileFormat = "";
 	previous = "";
+	scanType = 0; // One of the constants above
 
 	/**
 	 * @param {string} tpc
@@ -108,7 +113,7 @@ export class Reader {
 
 			this.processIncoming();
 
-			if (this.iqr.isStopped) {
+			if (this.isStopped) {
 				Reader.closeReadStream(rs);
 				break;
 			}
@@ -129,6 +134,7 @@ export class Reader {
 			complete: false,
 			idxFrom: 0, // Search from index...
 			idxFound: 0, // Index ending of complete note
+			result: 0, // of filter function
 			qtyNtFound: 0, // Qty of notes found so far
 			ntCnt: this.strctr.noteCnt, // Qty of notes for one complete note in structure
 		};
@@ -151,12 +157,22 @@ export class Reader {
 			this.previous = this.previous.slice(vars.idxFound + 1);
 
 			let note = this.tpc.composeNote(this.strctr, obj);
-			// Not needed for Inquirer results:
-			Reflect.deleteProperty(note, "__structure");
 
-			this.iqr.processNote(note);
-			if (!note.toIgnore()) {
-				this.iqr.aggregateAutoSet(note);
+			switch (this.scanType) {
+				case Reader.SCAN_FILTER:
+					vars.result = this.iqr(note);
+					if (vars.result >= 1) {
+						this.rt.push(note);
+						if (vars.result == 2) this.isStopped = true;
+					}
+					break;
+				case Reader.SCAN_INQUIRER:
+					this.iqr.processNote(note);
+					if (!note.toIgnore()) {
+						this.iqr.aggregateAutoSet(note);
+					}
+					this.iqr.isStopped = this.isStopped;
+					break;
 			}
 
 			// Recurse, since chunk might contain other than this note
@@ -195,17 +211,17 @@ export class Reader {
 
 	/** Scan a structure within a topic for notes
 	 *
+	 * @param {number} scanType
 	 * @param {Topic} tpc
 	 * @param {Structure} strctr
-	 * @param {Inquirer} iqr To gather information
+	 * @param {Inquirer|Function} iqr To gather information, see howto/usage.mjs
+	 * @param {Note[]} rt
 	 */
-	async scan(tpc, strctr, iqr) {
+	async scan(scanType, tpc, strctr, iqr, rt) {
 		let sm = await StoreManager.getInstance(),
 			tmp;
 
-		this.iqr = iqr;
-		this.strctr = strctr;
-		this.tpc = tpc;
+		this.reset(scanType, tpc, strctr, iqr, rt);
 
 		// Collect file list to process:
 
@@ -221,10 +237,26 @@ export class Reader {
 		files.push(...tmp);
 
 		// Process file list
-		for (let i = 0; i < files.length; i++) {
-			if (test("-f", files[i])) {
-				await this.scanFile(files[i]);
-			}
+		for (let i = 0; !this.isStopped && i < files.length; i++) {
+			if (!test("-f", files[i])) continue;
+			await this.scanFile(files[i]);
 		}
+	}
+
+	/** Reset before this.scan() or this.scanFile()
+	 *
+	 * @param {number} scanType
+	 * @param {Topic} tpc
+	 * @param {Structure} strctr
+	 * @param {Inquirer|Function} iqr To gather information, see howto/usage.mjs
+	 * @param {Note[]} rt
+	 */
+	reset() {
+		this.isStopped = false;
+		this.iqr = iqr;
+		this.rt = rt;
+		this.scanType = scanType;
+		this.strctr = strctr;
+		this.tpc = tpc;
 	}
 }

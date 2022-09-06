@@ -1,4 +1,5 @@
 "use strict";
+import { isAbsolute } from "node:path";
 import { Buffer } from "node:buffer";
 import { performance } from "node:perf_hooks";
 import { Formatter } from "../../utils.mjs";
@@ -102,6 +103,13 @@ Writes:
 		} else {
 			Notes.vars.writes.fastest = Math.min(Notes.vars.writes.fastest, duration);
 			Notes.vars.writes.slowest = Math.max(Notes.vars.writes.slowest, duration);
+		}
+	}
+
+	static setPath(dir) {
+		if (!isAbsolute(dir)) {
+			console.error(`Path for notes should be absolute. Passed: ${dir}`);
+			process.exit(-1);
 		}
 	}
 }

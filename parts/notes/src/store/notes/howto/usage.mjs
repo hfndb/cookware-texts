@@ -1,13 +1,15 @@
 "use strict";
+import { Inquirer, Notes } from "../index.mjs";
 import { Kitchen, Recipe } from "./structure.mjs";
-import { Inquirer } from "../inquirer.mjs";
+
+// Configuration: Set an absolute path to where notes are stored
+Notes.setPath("/tmp");
 
 /**
  * Howto's about usage, in function blocks
  */
 export class Howto {
-	/**
-	 * Adding a note
+	/** Adding a note
 	 */
 	async add() {
 		// Get instance of Topic
@@ -37,7 +39,36 @@ export class Howto {
 		await kitchen.retain(Recipe);
 	}
 
-	/**
+	/** Retrieve in a simple way.
+	 *
+	 * Scan a structure within a topic for notes.
+	 * You could compare this with Array.filter()
+	 */
+	async scanSimple() {
+		let kitchen = await Kitchen.getInstance(),
+			rt = []; // return value
+		await kitchen.scanUsingFilter(Recipe, rt, nt => {
+			// nt = Note instance
+			switch (nt.key) {
+				case 1:
+					return 0; // Ignore
+				case 2:
+					return 1; // Add to rt
+				case 3:
+					return 2; // Add to rt and finish scanning
+			}
+		});
+
+		console.log(rt); // Collected Note objects
+
+		// Stripped from internal properties beginning with __
+		let nt = rt[0];
+		console.log(Note.toString(nt)); // As string
+		console.log(Note.toObject(nt)); // As object
+	}
+
+	/** Retrieve and report in an advanced way.
+	 *
 	 * Scan a structure within a topic for notes.
 	 * You could compare this with an SQL SELECT
 	 */
@@ -46,10 +77,17 @@ export class Howto {
 		let iqr = new SampleInquiry();
 		await iqr.doSo();
 
+		// Collected Note objects, during iqr.processNote()
+		console.log(iqr.results);
+		// Calculated aggregates, known as a report summary
+		console.log(iqr.aggregates);
+
+		// Stripped from internal properties beginning with __
+		let nt = iqr.results[0];
+		console.log(Note.toString(nt)); // As string
+		console.log(Note.toObject(nt)); // As object
+
 		/**
-		 * Instance of SampleInquiry now has some aggregated values in
-		 * the object iqr.aggregates, known as a report summary.
-		 *
 		 * If you would like to create groups within a report, then:
 		 * - Create an instance of Inquirer
 		 * - Create a next instance and connect that to the first by means
@@ -57,6 +95,28 @@ export class Howto {
 		 *   to create an hierarchy.
 		 * - Then add aggregates at the deepest level.
 		 */
+	}
+
+	/** Edit already written notes
+	 */
+	async edit() {
+		let kitchen = await Kitchen.getInstance(),
+			notes = [];
+
+		// Get some notes to edit
+		await kitchen.scanUsingFilter(Recipe, notes, nt => {
+			return nt.key == 1 ? 1 : 2;
+		});
+
+		// Replace aka update
+		notes[0].intExample = 2;
+		kitchen.replaceNote(Recipe, notes[0]);
+
+		// Shred aka delete ake erase
+		kitchen.shredNote(Recipe, notes[1]);
+
+		// Retain, elsewhere known as 'save' or 'update'
+		await kitchen.retain(Recipe);
 	}
 }
 
@@ -85,14 +145,14 @@ export class SampleInquiry extends Inquirer {
 	/**
 	 * Overwritten method, called by Reader for each Note
 	 *
-	 * @param {Note} obj
+	 * @param {Note} nt
 	 */
-	processNote(obj) {
+	processNote(nt) {
 		// You could add calculated properties or do whatever else here
 
 		// Add note to result set of inquiry
-		if (obj.stringExample.includes("test")) {
-			this.results.push(obj);
+		if (nt.stringExample.includes("test")) {
+			this.results.push(nt);
 		}
 
 		if (false) {
@@ -101,7 +161,7 @@ export class SampleInquiry extends Inquirer {
 		}
 
 		if (false) {
-			// If you want to stop scanning
+			// If you want to finish scanning
 			this.stop();
 		}
 	}
