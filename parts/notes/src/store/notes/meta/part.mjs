@@ -1,4 +1,5 @@
 "use strict";
+import { VARIANT } from "../index.mjs";
 
 /** @typedef PartOptions
  * @property {*} [defaultValue]
@@ -6,7 +7,7 @@
  * @property {string} name
  * @property {string} [description]
  * @property {boolean} [required]
- * @property {string} [variant]
+ * @property {number} [variant]
  */
 
 /** Structure of a part of a note
@@ -16,7 +17,7 @@
  * @property {string} name
  * @property {string} [description]
  * @property {boolean} required
- * @property {string} variant
+ * @property {number} variant
  */
 export class Part {
 	defaultValue;
@@ -31,7 +32,7 @@ export class Part {
 	 */
 	constructor(opts) {
 		this.description = opts.description || opts.name;
-		this.variant = opts.variant || "string";
+		this.variant = opts.variant || VARIANT.STRING;
 		this.required = opts.required || false;
 
 		if (opts.foreignKey) {
@@ -47,21 +48,23 @@ export class Part {
 		}
 
 		switch (this.variant) {
-			case "boolean":
+			case VARIANT.BOOLEAN:
 				this.defaultValue = false;
 				break;
-			case "float":
-			case "int":
+			case VARIANT.FLOAT:
+			case VARIANT.INT:
 				this.defaultValue = 0;
 				break;
-			case "date":
-			case "string":
+			case VARIANT.DATE:
+			case VARIANT.DATETIME:
+			case VARIANT.FOREIGN_KEY:
+			case VARIANT.STRING:
 				this.defaultValue = "";
 				break;
-			case "array":
+			case VARIANT.ARRAY:
 				this.defaultValue = [];
 				break;
-			case "object":
+			case VARIANT.OBJECT:
 				this.defaultValue = {};
 				break;
 		}

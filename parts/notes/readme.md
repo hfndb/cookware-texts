@@ -2,11 +2,10 @@
 
 Notes is a lightweight [Node.js](https://en.wikipedia.org/wiki/Node.js) program (roughly 100 KB) to do something like making notes in order to retrieve those later. Not in a psyche, in memory, but in a computer. Simple, you might think.
 
-However, not using a known [file format](https://en.wikipedia.org/wiki/File_format) or even some [database](https://en.wikipedia.org/wiki/Database) seems a taboo in view of massive infections with the 'having it easy' virus. Within this taboo area, I have used another than customary approach for preserving notes. Which also resulted in other terms, another vocabulary.
+However, not using a known [database](https://en.wikipedia.org/wiki/Database) seems a taboo in view of massive infections with the 'having it easy' virus. Within this taboo area, I have used another than customary approach for preserving notes. Which also resulted in other terms, another vocabulary.
 
 This is a **preview** of a project which is currently in the phase of active architecturing and developing. By me, since there can only be one for now.
 
-**Project status**: Adding notes, write them from memory to disk, read them from disk to memory is finished. Updating and deleting what's already on disk still needs to be added.
 
 ## Translations
 

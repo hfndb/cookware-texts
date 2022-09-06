@@ -75,6 +75,9 @@ export async function test() {
 		log.opts.transports.file.active = false;
 	}
 
+	// Configuration: Set an absolute path to where notes are stored
+	Notes.setPath("/tmp");
+
 	kitchen = await Kitchen.getInstance(); // Topic
 	recipe = new Recipe(); // Structure
 

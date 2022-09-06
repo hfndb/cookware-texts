@@ -19,6 +19,9 @@ integrate(true);
 // Section: Merge files generated in a process
 // -----------------------------------------------------
 
+// Configuration: Set an absolute path to where notes are stored
+Notes.setPath("/tmp");
+
 // Get instance of Topic
 let kitchen = await Kitchen.getInstance();
 Merger.mergeServer(kitchen, "localhost");

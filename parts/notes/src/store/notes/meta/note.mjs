@@ -1,6 +1,6 @@
 "use strict";
 import { randomUUID } from "node:crypto";
-import { log, ObjectUtils } from "../index.mjs";
+import { log, ObjectUtils, VARIANT } from "../index.mjs";
 
 /** One note
  *
@@ -44,7 +44,10 @@ export class Note {
 
 			// Add default values for unspecified properties
 			if (val == undefined && !part.required) {
-				if (part.variant.startsWith("date") && part.defaultValue == "now") {
+				if (
+					(part.variant == VARIANT.DATE || part.variant == VARIANT.DATETIME) &&
+					part.defaultValue == "now"
+				) {
 					val = new Date();
 				} else {
 					val = part.defaultValue;

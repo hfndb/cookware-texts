@@ -1,5 +1,5 @@
 "use strict";
-import { Part, Structure, Topic } from "../index.mjs";
+import { Part, Structure, Topic, VARIANT } from "../index.mjs";
 
 // Howto setup a topic with structure
 
@@ -12,16 +12,14 @@ export class Recipe extends Structure {
 			name: "recipe",
 			additional: [], // For example; ingredients of recipe
 			autoAdd: {
-				key: true, // Default behavior, autoincrement
 				added: false, // Idem dito, datetime when added
 				updated: false, // Idem dito, datetime when updated
 			},
 			parts: [
 				// Part 'key' is automatically added (auto increment)
 
-				// Choices for variant:
-				// string (default), boolean, date, datetime, int, float
-				// string with unlimited lenght, like blob or text in a database.
+				// Choices for variant: See constant VARIANT
+				// VARIANT.STRING with unlimited lenght, like blob or text in a database
 
 				new Part({
 					name: "stringExample",
@@ -32,15 +30,15 @@ export class Recipe extends Structure {
 				new Part({
 					defaultValue: "now",
 					name: "dateExample",
-					variant: "date",
+					variant: VARIANT.DATE,
 				}),
 				new Part({
 					name: "intExample",
-					variant: "int",
+					variant: VARIANT.INT,
 				}),
 				new Part({
 					name: "floatExample",
-					variant: "float",
+					variant: VARIANT.FLOAT,
 				}),
 			],
 		});

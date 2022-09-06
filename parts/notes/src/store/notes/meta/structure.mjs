@@ -1,12 +1,12 @@
 "use strict";
-import { log, Notes } from "../index.mjs";
+import { log, Notes, VARIANT } from "../index.mjs";
 
 /** @typedef StructureOptions
  * @property {string} name
  * @property {string[]} additional Classes additional notes
  * @property {Object} autoAdd
  * @property {Part[]} parts
- * @property {number} variant. One of the static properties of this class
+ * @property {number} variant. Constant in VARIANT
  */
 
 /** Structure of a note aka record, row
@@ -15,7 +15,7 @@ import { log, Notes } from "../index.mjs";
  * @property {string[]} additional Classes additional notes
  * @property {Object} autoAdd
  * @property {Part[]} parts
- * @property {number} variant. One of the static properties of this class
+ * @property {number} variant. Constant in VARIANT
  * @todo Implement additional as in one invoice with multiple related items
  */
 export class Structure {
@@ -36,11 +36,20 @@ export class Structure {
 		this.parts = opts.parts;
 		this.autoAdd = Object.assign(
 			{
-				key: true,
 				added: false,
 				updated: false,
 			},
 			opts.autoAdd || {},
+		);
+
+		// Add key part
+		this.parts.unshift(
+			new Part({
+				defaultValue: "autoincrement",
+				name: "key",
+				required: true,
+				variant: VARIANT.INT,
+			}),
 		);
 
 		if (this.autoAdd.updated)
@@ -48,7 +57,7 @@ export class Structure {
 				new Part({
 					defaultValue: "now",
 					name: "updated",
-					variant: "datetime",
+					variant: VARIANT.DATETIME,
 				}),
 			);
 
@@ -57,18 +66,7 @@ export class Structure {
 				new Part({
 					defaultValue: "now",
 					name: "added",
-					variant: "datetime",
-				}),
-			);
-
-		// Add key part
-		if (this.autoAdd.key)
-			this.parts.unshift(
-				new Part({
-					defaultValue: "autoincrement",
-					name: "key",
-					required: true,
-					variant: "int",
+					variant: VARIANT.DATETIME,
 				}),
 			);
 	}

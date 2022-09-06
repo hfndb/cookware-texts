@@ -1,5 +1,6 @@
 "use strict";
 import { DateUtils } from "../../../../object.mjs";
+import { VARIANT } from "../../../index.mjs";
 
 /** Transform variants aka types to string vice versa
  */
@@ -42,7 +43,7 @@ export default class TsvPlugin {
 	 * String to variant
 	 *
 	 * @private
-	 * @param {string} variant
+	 * @param {number} variant
 	 * @param {string} val Value
 	 * @returns {*}
 	 */
@@ -50,21 +51,21 @@ export default class TsvPlugin {
 		let rt = val;
 
 		switch (variant) {
-			case "boolean":
+			case VARIANT.BOOLEAN:
 				rt = val ? true : false;
 				break;
-			case "float":
+			case VARIANT.FLOAT:
 				rt = val.includes(".") ? parseFloat(val) : parseInt(val);
 				break;
-			case "int":
+			case VARIANT.INT:
 				rt = parseInt(val);
 				break;
-			case "string":
+			case VARIANT.STRING:
 				rt = val
 					.replace(TsvPlugin.replacers.newline.regexFrom, "\n")
 					.replace(TsvPlugin.replacers.tab.regexFrom, "\t");
 				break;
-			case "date":
+			case VARIANT.DATE:
 				// Month readable but month for Date instance starts with index 0
 				rt = new Date(
 					parseInt(val.substring(0, 4)),
@@ -72,7 +73,7 @@ export default class TsvPlugin {
 					parseInt(val.substring(6, 8)),
 				);
 				break;
-			case "datetime":
+			case VARIANT.DATETIME:
 				// Month readable but month for Date instance starts with index 0
 				rt = new Date(
 					parseInt(val.substring(0, 4)),
@@ -82,8 +83,8 @@ export default class TsvPlugin {
 					parseInt(val.substring(10, 12)),
 				);
 				break;
-			case "array":
-			case "object":
+			case VARIANT.ARRAY:
+			case VARIANT.OBJECT:
 				rt = JSON.parse(val);
 				break;
 			default:
@@ -96,7 +97,7 @@ export default class TsvPlugin {
 	 * Variant to string
 	 *
 	 * @private
-	 * @param {string} variant
+	 * @param {number} variant
 	 * @param {*} val Value
 	 * @returns {string}
 	 */
@@ -104,14 +105,14 @@ export default class TsvPlugin {
 		let rt = val;
 
 		switch (variant) {
-			case "boolean":
+			case VARIANT.BOOLEAN:
 				rt = val ? "1" : "0";
 				break;
-			case "float":
-			case "int":
+			case VARIANT.FLOAT:
+			case VARIANT.INT:
 				rt = val.toString();
 				break;
-			case "string":
+			case VARIANT.STRING:
 				rt = val
 					.replace(
 						TsvPlugin.replacers.newline.regexTo,
@@ -119,15 +120,15 @@ export default class TsvPlugin {
 					)
 					.replace(TsvPlugin.replacers.tab.regexTo, TsvPlugin.replacers.tab.sign);
 				break;
-			case "date":
-			case "datetime":
+			case VARIANT.DATE:
+			case VARIANT.DATETIME:
 				if (!rt) return ""; // Empty date
 				let p = DateUtils.date2parts(val);
 				rt = `${p.year}${p.month}${p.day}`;
-				if (variant == "datetime") rt += `${p.hours}${p.minutes}`;
+				if (variant == VARIANT.DATETIME) rt += `${p.hours}${p.minutes}`;
 				break;
-			case "array":
-			case "object":
+			case VARIANT.ARRAY:
+			case VARIANT.OBJECT:
 				rt = JSON.stringify(val);
 				break;
 		}
