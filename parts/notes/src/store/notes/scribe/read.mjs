@@ -118,7 +118,6 @@ export class Reader {
 				break;
 			}
 		}
-		debugger; // TODO remove
 		Notes.addRead(performance.now() - vars.bgn, vars.bytesRead);
 
 		resolve();

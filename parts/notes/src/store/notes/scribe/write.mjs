@@ -160,11 +160,6 @@ export class Writer {
 			rt = await rdr.scanFileForEdit(tpc, strctr, files[i], processNote);
 			if (!rewrite) continue;
 
-			let tst = {
-				old: rt.length,
-				nw: 0,
-			};
-
 			// Convert Note instances in rt to writeables
 			for (let i = 0; i < rt.length; i++) {
 				idx = changes.findIndex(item => item.key == rt[i].key);
@@ -173,9 +168,6 @@ export class Writer {
 				}
 				rt[i] = Note.get2write(tpc, rt[i]);
 			}
-
-			tst.nw = rt.length;
-			if (tst.old != tst.nw) console.debug(tst.old, tst.nw);
 
 			// Overwrite
 			await Queues.get(files[i]); // Just to be sure
