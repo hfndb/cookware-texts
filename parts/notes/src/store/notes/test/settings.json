@@ -8,8 +8,8 @@
 		"retain": true,
 		"shred": true,
 		"scanUsing": {
-			"filter": false,
-			"inquirer": false
+			"filter": true,
+			"inquirer": true
 		}
 	},
 	"path": "/tmp/notes",
@@ -19,5 +19,5 @@
 		"scanResults": false,
 		"structure": false
 	},
-	"qtyTestItems": 10
+	"qtyTestItems": 1000
 }

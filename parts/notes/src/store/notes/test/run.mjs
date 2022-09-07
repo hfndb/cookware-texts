@@ -18,6 +18,9 @@ const __dirname = dirname(__filename);
 let cfg = AppConfig.getInstance("notes");
 integrate(true);
 
+let log = Logger.getInstance();
+console.debug = log.debug; // For dev purposes
+
 // -----------------------------------------------------------------------------------
 // Section: Test for adding notes
 // -----------------------------------------------------------------------------------

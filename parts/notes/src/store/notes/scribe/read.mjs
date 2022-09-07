@@ -118,6 +118,7 @@ export class Reader {
 				break;
 			}
 		}
+		debugger; // TODO remove
 		Notes.addRead(performance.now() - vars.bgn, vars.bytesRead);
 
 		resolve();
@@ -163,7 +164,7 @@ export class Reader {
 				case Reader.SCAN_FILTER:
 					vars.result = this.iqr(note);
 					if (vars.result >= 1) {
-						this.rt.push(note);
+						global.rt.push(note);
 						if (vars.result == 2) this.isStopped = true;
 					}
 					break;
@@ -253,7 +254,7 @@ export class Reader {
 	async scanFileForEdit(tpc, strctr, file, fnc) {
 		this.reset(Reader.SCAN_FILTER, tpc, strctr, fnc);
 		await this.scanFile(file);
-		return this.rt;
+		return global.rt;
 	}
 
 	/** Reset before this.scan() or this.scanFile()
@@ -273,5 +274,6 @@ export class Reader {
 		this.scanType = scanType;
 		this.strctr = strctr;
 		this.tpc = tpc;
+		global.rt = rt;
 	}
 }

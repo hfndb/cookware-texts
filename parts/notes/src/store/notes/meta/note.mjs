@@ -99,29 +99,49 @@ export class Note {
 
 	/** Clean string representation without internal properties beginning with __
 	 *
-	 * @param {Note} nt
-	 * @returns {string}
+	 * @param {Note|Note[]} nt
+	 * @returns {string|string[]}
 	 */
 
 	static toString(nt) {
-		return JSON.stringify(Note.toObject(nt), null, "\t");
+		if (nt instanceof Array) {
+			let rt = Array.from(nt);
+			for (let i = 0; i < rt.length; i++) {
+				rt[i] = JSON.stringify(Note.toObject(rt[i]), null, "\t");
+			}
+			return rt;
+		} else {
+			return JSON.stringify(Note.toObject(nt), null, "\t");
+		}
 	}
 
 	/** Stripped from internal properties beginning with __
 	 *
-	 * @param {Note} nt
-	 * @returns {Object}
+	 * @param {Note|Note[]} nt
+	 * @returns {Object|Object[]}
 	 */
 	static toObject(nt) {
-		let prp = Object.getOwnPropertyDescriptors(nt);
-		let rt = {};
+		let transform = obj => {
+			let prp = Object.getOwnPropertyDescriptors(obj);
+			let rt = {};
 
-		Object.keys(prp).forEach(key => {
-			if (key.startsWith("__")) return;
-			rt[key] = nt[key];
-		});
+			Object.keys(prp).forEach(key => {
+				if (key.startsWith("__")) return;
+				rt[key] = obj[key];
+			});
 
-		return rt;
+			return rt;
+		};
+
+		if (nt instanceof Array) {
+			let rt = Array.from(nt);
+			for (let i = 0; i < rt.length; i++) {
+				rt[i] = transform(rt[i]);
+			}
+			return rt;
+		} else {
+			return transform(nt);
+		}
 	}
 
 	/** Parse a retrieved note and return an object

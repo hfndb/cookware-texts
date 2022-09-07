@@ -131,6 +131,10 @@ export class Writer {
 		tmp = sm.get4reading(tpc, strctr.name, 2);
 		files.push(...tmp);
 
+		// Current in all pid's
+		tmp = sm.get4reading(tpc, strctr.name, 3);
+		files.push(...tmp);
+
 		// Function for Reader.scanFile()
 		let processNote = nt => {
 			idx = changes.findIndex(item => item.key == nt.key);
@@ -154,8 +158,12 @@ export class Writer {
 
 			// Collect all notes to write in rt while filtering out shredded
 			rt = await rdr.scanFileForEdit(tpc, strctr, files[i], processNote);
-			// TODO rt is now empty array and rewrite isn't changed
 			if (!rewrite) continue;
+
+			let tst = {
+				old: rt.length,
+				nw: 0,
+			};
 
 			// Convert Note instances in rt to writeables
 			for (let i = 0; i < rt.length; i++) {
@@ -163,8 +171,11 @@ export class Writer {
 				if (idx >= 0 && changes[idx].__status == NOTE_STATUS.CHANGED) {
 					rt[i] = changes[idx]; // Replace note
 				}
-				rt[i] = Note.get2write(tpc, nt);
+				rt[i] = Note.get2write(tpc, rt[i]);
 			}
+
+			tst.nw = rt.length;
+			if (tst.old != tst.nw) console.debug(tst.old, tst.nw);
 
 			// Overwrite
 			await Queues.get(files[i]); // Just to be sure
