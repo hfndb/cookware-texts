@@ -1,6 +1,6 @@
 "use strict";
 import { DateUtils } from "../../../../object.mjs";
-import { VARIANT } from "../../../index.mjs";
+import { VARIANT } from "../../index.mjs";
 
 /** Transform variants aka types to string vice versa
  */

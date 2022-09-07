@@ -3,7 +3,7 @@ import { isAbsolute } from "node:path";
 import { Buffer } from "node:buffer";
 import { performance } from "node:perf_hooks";
 import { Formatter } from "../../utils.mjs";
-import { StringExt, Note, Topic } from "./index.mjs";
+import { FileUtils, StringExt, Note, Topic } from "./index.mjs";
 
 /** Handle storage of notes (records, rows) in files
  */
@@ -111,5 +111,7 @@ Writes:
 			console.error(`Path for notes should be absolute. Passed: ${dir}`);
 			process.exit(-1);
 		}
+		Notes.options.dir = dir;
+		FileUtils.mkdir(dir);
 	}
 }

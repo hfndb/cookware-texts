@@ -1,5 +1,5 @@
 "use strict";
-import { Inquirer, log, Note, Notes } from "../index.mjs";
+import { Inquirer, log, Note, Notes, NOTE_STATUS } from "../index.mjs";
 import { Reader } from "../scribe/read.mjs";
 import { Writer } from "../scribe/write.mjs";
 import { StoreManager } from "../manager.mjs";
@@ -112,12 +112,12 @@ export class Topic {
 		// Queue for writing
 		if (!this.toWrite[n]) this.toWrite[n] = [];
 
-		if (nt.__status == Note.STATUS_UNCHANGED) return;
-		else if (nt.__status == "new") {
+		if (nt.__status == NOTE_STATUS.UNCHANGED) return;
+		else if (nt.__status == NOTE_STATUS.NEW) {
 			this.toWrite[n].push(nt);
 		} else if (
-			nt.__status == Note.STATUS_CHANGED ||
-			nt.__status == Note.STATUS_SHREDDED
+			nt.__status == NOTE_STATUS.CHANGED ||
+			nt.__status == NOTE_STATUS.SHREDDED
 		) {
 			let idx = this.toWrite[n].findIndex(item => {
 				if (nt?.key && nt.key > 0) return item?.key == nt.key;
@@ -155,7 +155,7 @@ export class Topic {
 	 */
 	replaceNote(strctr, nt) {
 		let toQueue = nt instanceof Note ? nt : this.composeNote(strctr, nt);
-		toQueue.__status = Note.STATUS_CHANGED;
+		toQueue.__status = NOTE_STATUS.CHANGED;
 		this.add2queue(toQueue);
 	}
 
@@ -166,7 +166,7 @@ export class Topic {
 	 */
 	shredNote(strctr, nt) {
 		let toQueue = nt instanceof Note ? nt : this.composeNote(strctr, nt);
-		toQueue.__status = Note.STATUS_SHREDDED;
+		toQueue.__status = NOTE_STATUS.SHREDDED;
 		this.add2queue(toQueue);
 	}
 
@@ -182,7 +182,7 @@ export class Topic {
 	async scan(strctr, iqr) {
 		let s = typeof strctr == "object" ? strctr : new strctr();
 		let rdr = new Reader();
-		await rdr.scan(Reader.SCAN_INQUIRER, this, s, iqr, rt);
+		await rdr.scan(Reader.SCAN_INQUIRER, this, s, iqr);
 	}
 
 	/** Scan a structure for notes

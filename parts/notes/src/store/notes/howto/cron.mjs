@@ -20,7 +20,7 @@ integrate(true);
 // -----------------------------------------------------
 
 // Configuration: Set an absolute path to where notes are stored
-Notes.setPath("/tmp");
+Notes.setPath("/tmp/notes");
 
 // Get instance of Topic
 let kitchen = await Kitchen.getInstance();

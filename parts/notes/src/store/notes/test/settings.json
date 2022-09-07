@@ -1,0 +1,23 @@
+{
+	"debug": false,
+	"interval": 50,
+	"parts": {
+		"add": true,
+		"merge": true,
+		"replace": true,
+		"retain": true,
+		"shred": true,
+		"scanUsing": {
+			"filter": false,
+			"inquirer": false
+		}
+	},
+	"path": "/tmp/notes",
+	"show": {
+		"lastNote": false,
+		"notes": false,
+		"scanResults": false,
+		"structure": false
+	},
+	"qtyTestItems": 10
+}

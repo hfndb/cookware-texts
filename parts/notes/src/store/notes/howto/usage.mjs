@@ -3,7 +3,7 @@ import { Inquirer, Notes } from "../index.mjs";
 import { Kitchen, Recipe } from "./structure.mjs";
 
 // Configuration: Set an absolute path to where notes are stored
-Notes.setPath("/tmp");
+Notes.setPath("/tmp/notes");
 
 /**
  * Howto's about usage, in function blocks

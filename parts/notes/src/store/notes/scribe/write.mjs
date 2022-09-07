@@ -4,6 +4,7 @@ import { appendFileSync } from "node:fs";
 import { join } from "node:path";
 import { Lock } from "../../../file-system/lock.mjs";
 import { Queues } from "../../../queue.mjs";
+import { NOTE_STATUS } from "../index.mjs";
 import {
 	mv,
 	test,
@@ -106,11 +107,12 @@ export class Writer {
 	 */
 	async updateFiles(tpc, strctr, changes) {
 		// Quick check. Any note to update or shred?
-		let changed = toWrite.reduce((acc, item, idx) => {
-			if (item.__status == Note.STATUS_NEW) return acc;
+		let changed = changes.reduce((acc, item, idx) => {
+			if (item.__status == NOTE_STATUS.NEW) return acc;
 			acc = true;
 			return acc;
 		}, false);
+
 		if (!changed) return;
 
 		let idx,
@@ -134,32 +136,31 @@ export class Writer {
 			idx = changes.findIndex(item => item.key == nt.key);
 			if (idx < 0) return 1; // No change, add to rt
 
-			if (changes[idx].__status == Note.STATUS_SHREDDED) {
+			if (changes[idx].__status == NOTE_STATUS.SHREDDED) {
 				rewrite = true;
 				return 0; // Ignore
 			}
 
-			if (changes[idx].__status == Note.STATUS_CHANGED) {
+			if (changes[idx].__status == NOTE_STATUS.CHANGED) {
 				rewrite = true;
 				return 1; // Add to rt
 			}
 		};
 
 		// Process file list
-		for (let i = 0; !rdr.isStopped && i < files.length; i++) {
+		for (let i = 0; i < files.length; i++) {
 			if (!test("-f", files[i])) continue;
 			rewrite = false;
-			rt = [];
 
 			// Collect all notes to write in rt while filtering out shredded
-			rdr.reset(Reader.SCAN_FILTER, tpc, strctr, processNote, rt);
-			await rdr.scanFile(files[i]);
+			rt = await rdr.scanFileForEdit(tpc, strctr, files[i], processNote);
+			// TODO rt is now empty array and rewrite isn't changed
 			if (!rewrite) continue;
 
 			// Convert Note instances in rt to writeables
 			for (let i = 0; i < rt.length; i++) {
 				idx = changes.findIndex(item => item.key == rt[i].key);
-				if (idx >= 0 && changes[idx].__status == Note.STATUS_CHANGED) {
+				if (idx >= 0 && changes[idx].__status == NOTE_STATUS.CHANGED) {
 					rt[i] = changes[idx]; // Replace note
 				}
 				rt[i] = Note.get2write(tpc, nt);
@@ -183,7 +184,7 @@ export class Writer {
 	 * @returns {Promise<boolean>} for success
 	 */
 	async write(server, pid, tpc, strctr, toWrite) {
-		await this.updateFiles(toWrite); // First update
+		await this.updateFiles(tpc, strctr, toWrite); // First update
 
 		let sm = await StoreManager.getInstance();
 		let keys = await Reader.getKeys(tpc.name, true);
@@ -203,7 +204,7 @@ export class Writer {
 		let data, nt;
 		for (let i = 0; this.success && i < toWrite.length; i++) {
 			nt = toWrite[i]; // Note
-			if (nt.__status != Note.STATUS_NEW) continue;
+			if (nt.__status != NOTE_STATUS.NEW) continue;
 
 			// Get new key
 			if (!keys[tpc.name][strctr.name]) keys[tpc.name][strctr.name] = 0; // In case of very first

@@ -1,6 +1,6 @@
 "use strict";
 import { randomUUID } from "node:crypto";
-import { log, ObjectUtils, VARIANT } from "../index.mjs";
+import { log, ObjectUtils, NOTE_STATUS, VARIANT } from "../index.mjs";
 
 /** One note
  *
@@ -25,7 +25,7 @@ export class Note {
 		// Class definition passed? Then transform to instance
 		if (typeof strctr == "function") strctr = new strctr();
 
-		this.__status = Note.STATUS_UNCHANGED;
+		this.__status = NOTE_STATUS.UNCHANGED;
 		this.__structure = strctr;
 		this.__uuid = randomUUID();
 		let part, val;
@@ -58,7 +58,7 @@ export class Note {
 
 		if (this.key == undefined) {
 			this.key = -1;
-			this.__status = "new";
+			this.__status = NOTE_STATUS.NEW;
 		}
 	}
 
@@ -113,11 +113,12 @@ export class Note {
 	 * @returns {Object}
 	 */
 	static toObject(nt) {
-		let prp = Object.getOwnPropertyDescriptors(object1);
+		let prp = Object.getOwnPropertyDescriptors(nt);
 		let rt = {};
 
 		Object.keys(prp).forEach(key => {
-			rt.key = nt.key;
+			if (key.startsWith("__")) return;
+			rt[key] = nt[key];
 		});
 
 		return rt;

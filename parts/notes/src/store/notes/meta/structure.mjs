@@ -1,5 +1,6 @@
 "use strict";
 import { log, Notes, VARIANT } from "../index.mjs";
+import { Part } from "./part.mjs";
 
 /** @typedef StructureOptions
  * @property {string} name

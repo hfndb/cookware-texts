@@ -1,6 +1,5 @@
 "use strict";
 import { createReadStream, ReadStream } from "node:fs";
-import { join } from "node:path";
 import { isAbsolute, join } from "node:path";
 import { Queues } from "../../../queue.mjs";
 import { Lock } from "../../../file-system/lock.mjs";
@@ -32,6 +31,7 @@ export class Reader {
 
 	block = false; // Block reading
 	fileFormat = "";
+	notesProcessed = 0;
 	previous = "";
 	scanType = 0; // One of the constants above
 
@@ -138,6 +138,7 @@ export class Reader {
 			qtyNtFound: 0, // Qty of notes found so far
 			ntCnt: this.strctr.noteCnt, // Qty of notes for one complete note in structure
 		};
+		this.notesProcessed++;
 
 		for (let i = 0; !vars.complete && i < vars.ntCnt; i++) {
 			vars.idxFound = this.previous.indexOf(
@@ -203,8 +204,8 @@ export class Reader {
 			return;
 		}
 
-		// Will resolve when scanning is stopped or end of file reached.
-		return new Promise(function(resolve) {
+		// Will resolve when scanning is stopped or end of file reached
+		return new Promise(resolve => {
 			instance.interateFile(reader, resolve, instance.tpc.transformer.fileFormat);
 		});
 	}
@@ -243,6 +244,18 @@ export class Reader {
 		}
 	}
 
+	/**
+	 * @param {Topic} tpc
+	 * @param {Structure} strctr
+	 * @param {Function} fnc To gather information, see howto/usage.mjs
+	 * @returns {Note[]}
+	 */
+	async scanFileForEdit(tpc, strctr, file, fnc) {
+		this.reset(Reader.SCAN_FILTER, tpc, strctr, fnc);
+		await this.scanFile(file);
+		return this.rt;
+	}
+
 	/** Reset before this.scan() or this.scanFile()
 	 *
 	 * @param {number} scanType
@@ -251,9 +264,11 @@ export class Reader {
 	 * @param {Inquirer|Function} iqr To gather information, see howto/usage.mjs
 	 * @param {Note[]} rt
 	 */
-	reset() {
+	reset(scanType, tpc, strctr, iqr, rt = []) {
+		this.block = false;
 		this.isStopped = false;
 		this.iqr = iqr;
+		this.notesProcessed = 0;
 		this.rt = rt;
 		this.scanType = scanType;
 		this.strctr = strctr;
