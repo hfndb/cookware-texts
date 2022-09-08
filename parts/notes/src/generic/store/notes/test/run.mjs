@@ -16,7 +16,7 @@ const __dirname = dirname(__filename);
 // Setup standalone version of integration with
 // files from cookware-headless-ice
 let cfg = AppConfig.getInstance("notes");
-integrate(true);
+integrate();
 
 let log = Logger.getInstance();
 console.debug = log.debug; // For dev purposes

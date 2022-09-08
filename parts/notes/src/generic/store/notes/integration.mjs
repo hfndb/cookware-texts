@@ -2,7 +2,6 @@
 import { AppConfig } from "../../config.mjs";
 import { Logger } from "../../log.mjs";
 import { test, FileUtils, Notes } from "./index.mjs";
-import { initConfig, setupLogger } from "./standalone.mjs";
 
 let log;
 
@@ -13,19 +12,14 @@ let log;
  * @param {boolean} standalone For cron jobs, tests and alike
  * @param {boolean} showLocks Log open file locks to console
  */
-export function integrate(standalone = false, showLocks = true) {
+export function integrate(showLocks = true) {
 	let cfg = AppConfig.getInstance();
 	if (cfg.options.store.notes) {
 		Notes.options = cfg.options.store.notes;
 	}
-	Notes.vars.serverName = cfg.options.server.name;
+	Notes.vars.serverName = cfg.options.store.serverName;
 	Notes.options.dir = cfg.options.store.notes.dir;
 	Notes.options.domain = cfg.options.domain.domain;
-
-	if (standalone) {
-		initConfig();
-		setupLogger(Logger.getInstance(cfg.options.logging));
-	}
 
 	log = Logger.getInstance(cfg.options.logging);
 

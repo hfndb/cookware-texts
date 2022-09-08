@@ -1,10 +1,30 @@
 # Notes
 
-Notes is a lightweight [Node.js](https://en.wikipedia.org/wiki/Node.js) program (roughly 100 KB) to do something like making notes in order to retrieve those later. Not in a psyche, in memory, but in a computer. Simple, you might think.
+`Notes` is a lightweight [Node.js](https://en.wikipedia.org/wiki/Node.js) program (roughly 100 KB) to do something like making notes in order to retrieve those later. Not in a psyche, in memory, but in a computer. Simple, you might think.
 
 However, not using a known [database](https://en.wikipedia.org/wiki/Database) seems a taboo in view of massive infections with the 'having it easy' virus. Within this taboo area, I have used another than customary approach for preserving notes. Which also resulted in other terms, another vocabulary.
 
 This is a **preview** of a project which is currently in the phase of active architecturing and developing. By me, since there can only be one for now.
+
+
+
+## Installation
+
+Prerequisites: You need to have git and the latest version of Node.js installed. See readme.md of [cookware-headless-ice](https://github.com/hfndb/cookware-headless-ice).
+
+The advised way to install is git cloning or downloading:
+
+```bash
+$ cd /opt
+$ git clone https://github.com/hfndb/cookware-texts
+$ cd cookware-texts/parts/notes
+$ npm install
+$ # Run test:
+$ node ./src/generic/store/notes/test/run.mjs
+$ # Re-run test:
+$ rm -rf /tmp/notes; node ./src/generic/store/notes/test/run.mjs
+
+```
 
 
 ## Translations
@@ -22,7 +42,7 @@ Other:
 + 'Save' or 'update' became 'retain' as in retaining a note.
 + 'Open' or something like a [Select](https://en.wikipedia.org/wiki/Select_%28SQL%29) in SQL language became 'scan' as in scanning notes.
 
-Yes, I agree. Only using other terms, words, doesn't make a program really different. In which way this program is really different than others, I for now preserve as a mystery 😄
+Yes, I agree. Only using other terms, words, doesn't make a program really different. In which way this program could become really different than others, I for now preserve as a mystery 😄
 
 
 ## Variants

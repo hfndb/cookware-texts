@@ -1,3 +1,19 @@
 {
-	"version": "0.0.1"
+	"version": "0.0.1",
+	"projectOverview": {
+		"exclude": [
+			"default-settings.mjs",
+			"generic/config.mjs",
+			"generic/file-system/diff.mjs",
+			"generic/file-system/dirs.mjs",
+			"generic/file-system/files.mjs",
+			"generic/log.mjs",
+			"generic/object.mjs",
+			"generic/store/file-system/lock.mjs",
+			"generic/sys.mjs",
+			"generic/queue.mjs",
+			"generic/utils.mjs",
+			"node_modules"
+		]
+	}
 }

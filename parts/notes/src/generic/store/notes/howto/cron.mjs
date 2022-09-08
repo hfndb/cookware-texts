@@ -12,8 +12,7 @@ import { Kitchen } from "./structure.mjs";
  * @see https://en.wikipedia.org/wiki/Anacron
  */
 
-// Initialization of variables for standalone usage
-integrate(true);
+integrate(); // Initialization of variables
 
 // -----------------------------------------------------
 // Section: Merge files generated in a process
