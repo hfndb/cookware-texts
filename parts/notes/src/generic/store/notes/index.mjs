@@ -5,7 +5,7 @@ import { ObjectUtils } from "../../object.mjs";
 import { StringExt } from "../../utils.mjs";
 import { NOTE_STATUS, VARIANT } from "./constants.mjs";
 import { log } from "./integration.mjs";
-import { Inquirer } from "./inquirer.mjs";
+import { Inquirer, InquirerFilter } from "./inquirer.mjs";
 import { Note } from "./meta/note.mjs";
 import { Part } from "./meta/part.mjs";
 import { Structure } from "./meta/structure.mjs";
@@ -23,6 +23,7 @@ export {
 	StringExt,
 	log,
 	Inquirer,
+	InquirerFilter,
 	Note,
 	Notes,
 	NOTE_STATUS,

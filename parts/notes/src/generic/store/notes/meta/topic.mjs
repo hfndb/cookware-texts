@@ -1,5 +1,12 @@
 "use strict";
-import { Inquirer, log, Note, Notes, NOTE_STATUS } from "../index.mjs";
+import {
+	Inquirer,
+	InquirerFilter,
+	log,
+	Note,
+	Notes,
+	NOTE_STATUS,
+} from "../index.mjs";
 import { Reader } from "../scribe/read.mjs";
 import { Writer } from "../scribe/write.mjs";
 import { StoreManager } from "../manager.mjs";
@@ -20,6 +27,10 @@ import { Transformer } from "../transform/transformer.mjs";
  * @property {Structure[]} [additional] Classes additional notes
  */
 export class Topic {
+	static FILTER_IGNORE = 1;
+	static FILTER_KEEP = 2;
+	static FILTER_KEEP_AND_FINISH = 3;
+
 	/**
 	 * @param {TopicOptions} opts
 	 */
@@ -188,12 +199,14 @@ export class Topic {
 	/** Scan a structure for notes
 	 *
 	 * @param {Structure} strctr
-	 * @param {Note[]} rt Result set in case of a function passed
 	 * @param {Function} fltr Filter function, see howto/usage.mjs
 	 */
-	async scanUsingFilter(strctr, rt, fltr) {
-		let s = typeof strctr == "object" ? strctr : new strctr();
-		let rdr = new Reader();
-		await rdr.scan(Reader.SCAN_FILTER, this, s, fltr, rt);
+	async scanUsingFilter(strctr, fltr) {
+		let iqr = new InquirerFilter(fltr),
+			s = typeof strctr == "object" ? strctr : new strctr(),
+			rdr = new Reader();
+
+		await rdr.scan(Reader.SCAN_FILTER, this, s, iqr);
+		return iqr.results;
 	}
 }

@@ -104,6 +104,10 @@ export class AppConfig {
 	 */
 	static getInstance(name = "", dirProject = "") {
 		if (!AppConfig.instance) {
+			if (global.cfg) {
+				AppConfig.instance = global.cfg; // async trouble in action
+				return AppConfig.instance;
+			}
 			if (!name)
 				console.log(new Error("AppConfig initialized without project name"));
 			let dirMain = normalize(process.cwd());

@@ -7,6 +7,7 @@ import {
 	test,
 	FileUtils,
 	Inquirer,
+	InquirerFilter,
 	log,
 	Note,
 	Notes,
@@ -161,10 +162,10 @@ export class Reader {
 
 			switch (this.scanType) {
 				case Reader.SCAN_FILTER:
-					vars.result = this.iqr(note);
-					if (vars.result >= 1) {
-						global.rt.push(note);
-						if (vars.result == 2) this.isStopped = true;
+					vars.result = this.iqr.processNote(note);
+					if (vars.result != Topic.FILTER_IGNORE) {
+						this.iqr.results.push(note);
+						this.isStopped = vars.result == Topic.FILTER_KEEP_AND_FINISH;
 					}
 					break;
 				case Reader.SCAN_INQUIRER:
@@ -172,9 +173,9 @@ export class Reader {
 					if (!note.toIgnore()) {
 						this.iqr.aggregateAutoSet(note);
 					}
-					this.iqr.isStopped = this.isStopped;
 					break;
 			}
+			this.iqr.isStopped = this.isStopped;
 
 			// Recurse, since chunk might contain other than this note
 			this.processIncoming();
@@ -216,13 +217,12 @@ export class Reader {
 	 * @param {Topic} tpc
 	 * @param {Structure} strctr
 	 * @param {Inquirer|Function} iqr To gather information, see howto/usage.mjs
-	 * @param {Note[]} rt
 	 */
-	async scan(scanType, tpc, strctr, iqr, rt) {
+	async scan(scanType, tpc, strctr, iqr) {
 		let sm = await StoreManager.getInstance(),
 			tmp;
 
-		this.reset(scanType, tpc, strctr, iqr, rt);
+		this.reset(scanType, tpc, strctr, iqr);
 
 		// Collect file list to process:
 
@@ -247,13 +247,14 @@ export class Reader {
 	/**
 	 * @param {Topic} tpc
 	 * @param {Structure} strctr
-	 * @param {Function} fnc To gather information, see howto/usage.mjs
+	 * @param {Function} fltr To gather information, see howto/usage.mjs
 	 * @returns {Note[]}
 	 */
-	async scanFileForEdit(tpc, strctr, file, fnc) {
-		this.reset(Reader.SCAN_FILTER, tpc, strctr, fnc);
+	async scanFileForEdit(tpc, strctr, file, fltr) {
+		let iqr = new InquirerFilter(fltr);
+		this.reset(Reader.SCAN_FILTER, tpc, strctr, iqr);
 		await this.scanFile(file);
-		return global.rt;
+		return iqr.results;
 	}
 
 	/** Reset before this.scan() or this.scanFile()
@@ -262,17 +263,14 @@ export class Reader {
 	 * @param {Topic} tpc
 	 * @param {Structure} strctr
 	 * @param {Inquirer|Function} iqr To gather information, see howto/usage.mjs
-	 * @param {Note[]} rt
 	 */
-	reset(scanType, tpc, strctr, iqr, rt = []) {
+	reset(scanType, tpc, strctr, iqr) {
 		this.block = false;
 		this.isStopped = false;
 		this.iqr = iqr;
 		this.notesProcessed = 0;
-		this.rt = rt;
 		this.scanType = scanType;
 		this.strctr = strctr;
 		this.tpc = tpc;
-		global.rt = rt;
 	}
 }

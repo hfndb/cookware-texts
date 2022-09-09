@@ -1,12 +1,14 @@
 "use strict";
-import { log, ObjectUtils } from "./index.mjs";
+import { log, Note, ObjectUtils } from "./index.mjs";
 
 /**
- * For scanning purposes
+ * For scanning purposes; typical report
  *
- * @property {boolean} continue
- * @property {Inquirer|null} parent
+ *
+ * @property {number} cnt Count of processed notes
  * @property {*[]} results
+ * @property {Object} aggregates
+ * @property {Inquirer|null} parent
  * @todo report grouping (hierarchical nesting)
  */
 export class Inquirer {
@@ -159,5 +161,42 @@ export class Inquirer {
 		Reflect.deleteProperty(obj, "MAX");
 		Reflect.deleteProperty(obj, "SUM");
 		return obj;
+	}
+}
+
+/**
+ * For scanning purposes; style of Array.filter()
+ *
+ * @property {Note[]} results
+ */
+export class InquirerFilter {
+	/**
+	 * Inquiring continues as long is this property is false.
+	 * Read by Reader.
+	 * @private
+	 */
+	isStopped = false;
+
+	/**
+	 * If you want to do something like an SQL Select, to get a result set.
+	 */
+	results = [];
+
+	/**
+	 * Method to overwrite while extending.
+	 *
+	 * @param {Function} fnc
+	 */
+	constructor(fnc) {
+		this.fncProcess = fnc;
+	}
+
+	/**
+	 * Method to overwrite while extending.
+	 *
+	 * @param {Notes} obj
+	 */
+	processNote(obj) {
+		return this.fncProcess(obj);
 	}
 }

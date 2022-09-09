@@ -138,16 +138,16 @@ export class Writer {
 		// Function for Reader.scanFile()
 		let processNote = nt => {
 			idx = changes.findIndex(item => item.key == nt.key);
-			if (idx < 0) return 1; // No change, add to rt
+			if (idx < 0) return Topic.FILTER_KEEP; // No change, add to result
 
 			if (changes[idx].__status == NOTE_STATUS.SHREDDED) {
 				rewrite = true;
-				return 0; // Ignore
+				return Topic.FILTER_IGNORE;
 			}
 
 			if (changes[idx].__status == NOTE_STATUS.CHANGED) {
 				rewrite = true;
-				return 1; // Add to rt
+				return Topic.FILTER_KEEP; // Add to result
 			}
 		};
 

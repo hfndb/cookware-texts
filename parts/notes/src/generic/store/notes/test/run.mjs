@@ -5,7 +5,7 @@ import { randomUUID } from "node:crypto";
 import { AppConfig } from "../../../config.mjs";
 import { Logger } from "../../../log.mjs";
 import { Formatter } from "../../../utils.mjs";
-import { FileUtils, Note, Notes, StringExt } from "../index.mjs";
+import { FileUtils, Note, Notes, StringExt, Topic } from "../index.mjs";
 import { integrate } from "../integration.mjs";
 import { Kitchen, Recipe } from "../howto/structure.mjs";
 import { SampleInquiry } from "../howto/usage.mjs";
@@ -176,9 +176,8 @@ export async function test() {
 
 	if (cfg.parts.scanUsing.filter) {
 		now = Date.now();
-		let rt = []; // For colleting notes
-		await kitchen.scanUsingFilter(Recipe, rt, nt => {
-			return 1; // Add to rt
+		let rt = await kitchen.scanUsingFilter(Recipe, nt => {
+			return Topic.FILTER_KEEP;
 		});
 		timeElapsed = Date.now() - now;
 		console.log(
@@ -199,13 +198,12 @@ export async function test() {
 	let nt, rt; // For collecting notes
 	if (cfg.parts.replace) {
 		// Replace a note, causing rewrite of a file
-		rt = [];
-		await kitchen.scanUsingFilter(Recipe, rt, nt => {
-			return nt.key == 1 ? 2 : 0; // Get only one, ignore others
+		rt = await kitchen.scanUsingFilter(Recipe, nt => {
+			// Get only one, ignore others
+			return nt.key == 1 ? Topic.FILTER_KEEP_AND_FINISH : Topic.FILTER_IGNORE;
 		});
 
 		nt = rt[0];
-
 		nt.stringExample = "Updated";
 
 		kitchen.replaceNote(Recipe, nt);
@@ -223,9 +221,9 @@ export async function test() {
 
 	if (cfg.parts.shred) {
 		// Shred a note, causing rewrite of a file
-		rt = [];
-		await kitchen.scanUsingFilter(Recipe, rt, nt => {
-			return nt.key == 2 ? 2 : 0; // Get only one, ignore others
+		rt = await kitchen.scanUsingFilter(Recipe, nt => {
+			// Get only one, ignore others
+			return nt.key == 2 ? Topic.FILTER_KEEP_AND_FINISH : Topic.FILTER_IGNORE;
 		});
 
 		kitchen.shredNote(Recipe, rt[0]);

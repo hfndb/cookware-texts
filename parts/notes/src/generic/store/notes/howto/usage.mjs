@@ -1,5 +1,5 @@
 "use strict";
-import { Inquirer, Notes } from "../index.mjs";
+import { Inquirer, Notes, Topic } from "../index.mjs";
 import { Kitchen, Recipe } from "./structure.mjs";
 
 // Configuration: Set an absolute path to where notes are stored
@@ -45,17 +45,16 @@ export class Howto {
 	 * You could compare this with Array.filter()
 	 */
 	async scanSimple() {
-		let kitchen = await Kitchen.getInstance(),
-			rt = []; // return value
-		await kitchen.scanUsingFilter(Recipe, rt, nt => {
+		let kitchen = await Kitchen.getInstance();
+		let rt = await kitchen.scanUsingFilter(Recipe, nt => {
 			// nt = Note instance
 			switch (nt.key) {
 				case 1:
-					return 0; // Ignore
+					return Topic.FILTER_IGNORE;
 				case 2:
-					return 1; // Add to rt
+					return Topic.FILTER_KEEP;
 				case 3:
-					return 2; // Add to rt and finish scanning
+					return Topic.FILTER_KEEP_AND_FINISH;
 			}
 		});
 
