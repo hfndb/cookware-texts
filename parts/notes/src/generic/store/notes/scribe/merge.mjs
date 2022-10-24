@@ -1,6 +1,5 @@
 "use strict";
 import { join } from "node:path";
-import { getDirList } from "../../../file-system/dirs.mjs";
 import { exec, test, FileUtils, log, Notes, Topic } from "../index.mjs";
 import { StoreManager } from "../manager.mjs";
 
@@ -63,7 +62,7 @@ export class Merger {
 	 */
 	async processStructure() {
 		if (!test("-d", this.vars.rootPath)) return; // No files yet
-		let dirs = getDirList(this.vars.rootPath, false); // List of pid's
+		let dirs = FileUtils.getDirList(this.vars.rootPath, false); // List of pid's
 
 		for (let i = 0; i < dirs.length; i++) {
 			this.vars.pid = dirs[i];

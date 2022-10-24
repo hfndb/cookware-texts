@@ -1,6 +1,5 @@
 "use strict";
 import { join, sep } from "node:path";
-import { getDirList } from "../../file-system/dirs.mjs";
 import { test, touch, FileUtils, StringExt, Notes, Topic } from "./index.mjs";
 import { Writer } from "./scribe/write.mjs";
 
@@ -203,7 +202,7 @@ export class StoreManager {
 
 		if (!test("-d", path)) return rt; // In case of no note files for structure at all
 
-		let servers = getDirList(path, false);
+		let servers = FileUtils.getDirList(path, false);
 		for (let i = 0; i < servers.length; i++) {
 			files = FileUtils.getFileList(join(path, servers[i]), {
 				recursive: true,

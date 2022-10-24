@@ -4,6 +4,9 @@
  *     Alternative to create and maintain a strict queue for specific activity
  *     to prevent concurrent activity.
  *
+ * Alternatives:
+ * @see https://github.com/coopernurse/node-pool
+ *
  * Method:
  *     Keeps a register, queues with requests.
  *     Each kind of activity has a unique identifier.
